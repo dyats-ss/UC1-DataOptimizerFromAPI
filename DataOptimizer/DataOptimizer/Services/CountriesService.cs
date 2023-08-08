@@ -1,11 +1,10 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace DataOptimizer.Services;
 
 public interface ICountriesService
 {
-    Task<List<JsonElement>> GetAllCountriesAsync(string? countryName, int? population, string? p3);
+    Task<List<JsonElement>> GetCountriesAsync(string? countryName, int? population, string? p3);
 }
 
 public class CountriesService : ICountriesService
@@ -19,7 +18,7 @@ public class CountriesService : ICountriesService
         _configuration = configuration;
     }
 
-    public async Task<List<JsonElement>> GetAllCountriesAsync(string? countryName, int? population, string? p3)
+    public async Task<List<JsonElement>> GetCountriesAsync(string? countryName, int? population, string? p3)
     {
         var result = await _httpClient.GetAsync(_configuration.GetValue<string>("RestCountriesURL"));
 
@@ -28,6 +27,11 @@ public class CountriesService : ICountriesService
         if(!string.IsNullOrEmpty(countryName))
         {
             json = json.Where(x => x.GetProperty("name").GetProperty("common").ToString().ToLower().Contains(countryName.ToLower())).ToList();
+        }
+
+        if (population is not null and > 0)
+        {
+            json = json.Where(x => Convert.ToInt32(x.GetProperty("population").ToString()) <= population.Value * 1_000_000).ToList();
         }
 
         return json;
