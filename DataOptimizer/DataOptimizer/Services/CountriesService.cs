@@ -1,10 +1,12 @@
-﻿using System.Text.Json;
+﻿using DataOptimizer.Models;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Text.Json;
 
 namespace DataOptimizer.Services;
 
 public interface ICountriesService
 {
-    Task<IEnumerable<JsonElement>> GetCountriesAsync(string? countryName, int? population, string? sortOrder);
+    Task<IEnumerable<Country>> GetCountriesAsync(int page = 1, int numberOfItems = 15, string? countryName = null, int? populationInMillions = null, string? sortOrder = null);
 }
 
 public class CountriesService : ICountriesService
@@ -18,34 +20,36 @@ public class CountriesService : ICountriesService
         _configuration = configuration;
     }
 
-    public async Task<IEnumerable<JsonElement>> GetCountriesAsync(string? countryName, int? population, string? sortOrder)
+    public async Task<IEnumerable<Country>> GetCountriesAsync(int page = 1, int numberOfItems = 15, string? countryName = null, int? populationInMillions = null, string? sortOrder = null)
     {
-        var result = await _httpClient.GetAsync(_configuration.GetValue<string>("RestCountriesURL"));
+        var url = _configuration["RestCountriesURL"];
+        var result = await _httpClient.GetAsync(url);
 
-        var json = await result.Content.ReadFromJsonAsync<IEnumerable<JsonElement>>();
+        var json = await result.Content.ReadFromJsonAsync<IEnumerable<Country>>();
 
         if(!string.IsNullOrEmpty(countryName))
         {
-            json = json?.Where(x => x.GetProperty("name").GetProperty("common").ToString().ToLower().Contains(countryName.ToLower()));
+            json = json?.Where(x => x.Name.Common.ToLower().Contains(countryName.ToLower()));
         }
 
-        if (population is not null and > 0)
+        if (populationInMillions is not null and > 0)
         {
-            json = json?.Where(x => Convert.ToInt32(x.GetProperty("population").ToString()) <= population.Value * 1_000_000);
+            json = json?.Where(x => x.Population <= populationInMillions.Value * 1_000_000);
         }
 
         if (!string.IsNullOrEmpty(sortOrder))
         {
             if (sortOrder is "asc" or "ascend")
             {
-                json = json?.OrderBy(x => x.GetProperty("name").GetProperty("common").ToString());
+                json = json?.OrderBy(x => x.Name.Common.ToString());
             }
             else if (sortOrder is "desc" or "descend")
             {
-                json = json?.OrderByDescending(x => x.GetProperty("name").GetProperty("common").ToString());
+                json = json?.OrderByDescending(x => x.Name.Common.ToString());
             }
         }
 
-        return json!;
-    }    
+        return json!.Skip((page - 1) * numberOfItems)
+            .Take(numberOfItems);
+    }
 }

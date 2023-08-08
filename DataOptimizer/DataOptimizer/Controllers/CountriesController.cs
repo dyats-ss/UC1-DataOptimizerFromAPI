@@ -1,4 +1,5 @@
-﻿using DataOptimizer.Services;
+﻿using DataOptimizer.Models;
+using DataOptimizer.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DataOptimizer.Controllers;
@@ -14,14 +15,8 @@ public class CountriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetCountries(int page = 1, int numberOfItems = 15, string? countryName = null, int? populationInMillions = null, string? sortOrder = null)
+    public async Task<IEnumerable<Country>> GetCountries(int page = 1, int numberOfItems = 15, string? countryName = null, int? populationInMillions = null, string? sortOrder = null)
     {
-        var result = await _countriesService.GetCountriesAsync(countryName, populationInMillions, sortOrder);
-
-        var paginatedResult = result
-            .Skip((page - 1) * numberOfItems)
-            .Take(numberOfItems);
-
-        return Ok(paginatedResult);
+        return await _countriesService.GetCountriesAsync(page, numberOfItems, countryName, populationInMillions, sortOrder);
     }
 }
