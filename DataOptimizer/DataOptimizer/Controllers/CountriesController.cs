@@ -1,22 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DataOptimizer.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DataOptimizer.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class CountriesController : ControllerBase
 {
-    private readonly HttpClient _httpClient;
+    private readonly ICountriesService _countriesService;
 
-    public CountriesController(IHttpClientFactory httpClientFactory)
+    public CountriesController(ICountriesService countriesService)
     {
-        _httpClient = httpClientFactory.CreateClient();
+        _countriesService = countriesService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetCountries(string? p1, int? p2, string? p3)
+    public async Task<IActionResult> GetCountries(string? countryName, int? p2, string? p3)
     {
-        var result = await _httpClient.GetAsync("https://restcountries.com/v3.1/all");
+       var res = await _countriesService.GetAllCountriesAsync(countryName, p2, p3);
 
-        return Ok(result.Content.ReadFromJsonAsync<object>());
+        return Ok(res);
     }
 }
