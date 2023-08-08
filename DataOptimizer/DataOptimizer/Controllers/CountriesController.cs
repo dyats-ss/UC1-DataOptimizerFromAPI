@@ -14,9 +14,9 @@ public class CountriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetCountries(string? countryName, int? p2, string? p3)
+    public async Task<IActionResult> GetCountries(string? countryName, int? p2, string? sortOrder)
     {
-       var res = await _countriesService.GetCountriesAsync(countryName, p2, p3);
+       var res = await _countriesService.GetCountriesAsync(countryName, p2, sortOrder);
 
         return Ok(res);
     }
