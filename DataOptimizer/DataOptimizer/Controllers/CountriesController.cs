@@ -16,10 +16,12 @@ public class CountriesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetCountries(int page = 1, int numberOfItems = 15, string? countryName = null, int? populationInMillions = null, string? sortOrder = null)
     {
-        var res = await _countriesService.GetCountriesAsync(countryName, populationInMillions, sortOrder);
+        var result = await _countriesService.GetCountriesAsync(countryName, populationInMillions, sortOrder);
 
-        return Ok(res
+        var paginatedResult = result
             .Skip((page - 1) * numberOfItems)
-            .Take(numberOfItems));
+            .Take(numberOfItems);
+
+        return Ok(paginatedResult);
     }
 }
