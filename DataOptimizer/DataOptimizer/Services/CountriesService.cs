@@ -32,7 +32,7 @@ public class CountriesService : ICountriesService
             json = json?.Where(x => x.Name.Common.ToLower().Contains(countryName.ToLower()));
         }
 
-        if (populationInMillions is not null and > 0)
+        if (populationInMillions is > 0)
         {
             json = json?.Where(x => x.Population <= populationInMillions.Value * 1_000_000);
         }
