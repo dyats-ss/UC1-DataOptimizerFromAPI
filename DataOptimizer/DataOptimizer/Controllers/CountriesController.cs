@@ -14,10 +14,12 @@ public class CountriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetCountries(string? countryName, int? p2, string? sortOrder)
+    public async Task<IActionResult> GetCountries(int page = 1, int numberOfItems = 15, string? countryName = null, int? populationInMillions = null, string? sortOrder = null)
     {
-       var res = await _countriesService.GetCountriesAsync(countryName, p2, sortOrder);
+        var res = await _countriesService.GetCountriesAsync(countryName, populationInMillions, sortOrder);
 
-        return Ok(res);
+        return Ok(res
+            .Skip((page - 1) * numberOfItems)
+            .Take(numberOfItems));
     }
 }

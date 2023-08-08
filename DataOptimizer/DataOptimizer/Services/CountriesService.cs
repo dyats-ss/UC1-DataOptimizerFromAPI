@@ -26,26 +26,26 @@ public class CountriesService : ICountriesService
 
         if(!string.IsNullOrEmpty(countryName))
         {
-            json = json.Where(x => x.GetProperty("name").GetProperty("common").ToString().ToLower().Contains(countryName.ToLower()));
+            json = json?.Where(x => x.GetProperty("name").GetProperty("common").ToString().ToLower().Contains(countryName.ToLower()));
         }
 
         if (population is not null and > 0)
         {
-            json = json.Where(x => Convert.ToInt32(x.GetProperty("population").ToString()) <= population.Value * 1_000_000);
+            json = json?.Where(x => Convert.ToInt32(x.GetProperty("population").ToString()) <= population.Value * 1_000_000);
         }
 
         if (!string.IsNullOrEmpty(sortOrder))
         {
             if (sortOrder is "asc" or "ascend")
             {
-                json = json.OrderBy(x => x.GetProperty("name").GetProperty("common").ToString());
+                json = json?.OrderBy(x => x.GetProperty("name").GetProperty("common").ToString());
             }
             else if (sortOrder is "desc" or "descend")
             {
-                json = json.OrderByDescending(x => x.GetProperty("name").GetProperty("common").ToString());
+                json = json?.OrderByDescending(x => x.GetProperty("name").GetProperty("common").ToString());
             }
         }
 
-        return json;
+        return json!;
     }    
 }
